@@ -1,0 +1,6 @@
+{
+  "name": "PLD Active Member Lightboard",
+  "description": "Real-time insurance agency Active Member lightboard dashboard with backend report processor for SalesProductionAgencyPerfomanceReport.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
