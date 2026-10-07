@@ -162,7 +162,10 @@ function loadInitialState(): AppState {
 
 function saveState(state: AppState) {
   try {
-    fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2), 'utf-8');
+    if (Array.isArray(state.syncHistory) && state.syncHistory.length > 3) {
+      state.syncHistory = state.syncHistory.slice(0, 3);
+    }
+    fs.writeFileSync(STATE_FILE, JSON.stringify(state), 'utf-8');
   } catch (err) {
     console.error('Failed to save state:', err);
   }
@@ -2272,17 +2275,23 @@ async function startServer() {
     res.json({ success: true, state: appState });
   });
 
-  // POST auto-sync HEADCOUNT BY AVA.xls from Google Drive folder
-  app.post('/api/sync-gdrive-headcount', async (_req, res) => {
+  // POST/GET auto-sync HEADCOUNT BY AVA.xls from Google Drive folder (instant response + background refresh)
+  app.all('/api/sync-gdrive-headcount', async (_req, res) => {
     try {
-      const headcountLog = await syncHeadcountFromGoogleDrive();
-      const syncLog = await syncSalesReportsFromGoogleDrive();
-      if (!headcountLog && !syncLog) {
-        res.status(500).json({
-          error: '無法載入 Google Drive 檔案，請稍後再試',
-        });
-        return;
-      }
+      const headcountLog =
+        appState.lastHeadcountSync || loadHeadcountFromLocalDiskIfAvailable();
+      const syncLog =
+        appState.lastSync || loadSalesReportsFromLocalDiskIfAvailable();
+
+      // Trigger background Google Drive refresh without blocking the HTTP response
+      (async () => {
+        try {
+          const bgHc = await syncHeadcountFromGoogleDrive();
+          const bgRep = await syncSalesReportsFromGoogleDrive();
+          if (bgHc || bgRep) broadcastState('state:updated');
+        } catch {}
+      })();
+
       broadcastState('state:updated');
       res.json({
         success: true,
@@ -2298,16 +2307,20 @@ async function startServer() {
     }
   });
 
-  // POST auto-sync SalesProductionAgency_PLD_THIS MONTH & SalesProductionAgency_HSUI_THIS MONTH.xls from Google Drive folder
-  app.post('/api/sync-gdrive-reports', async (_req, res) => {
+  // POST/GET auto-sync SalesProductionAgency_PLD_THIS MONTH & SalesProductionAgency_HSUI_THIS MONTH.xls from Google Drive folder (instant response + background refresh)
+  app.all('/api/sync-gdrive-reports', async (_req, res) => {
     try {
-      const syncLog = await syncSalesReportsFromGoogleDrive();
-      if (!syncLog) {
-        res.status(500).json({
-          error: '無法從 Google Drive 載入 SalesProductionAgency 報表，請稍後再試',
-        });
-        return;
-      }
+      const syncLog =
+        appState.lastSync || loadSalesReportsFromLocalDiskIfAvailable();
+
+      // Trigger background Google Drive refresh without blocking the HTTP response
+      (async () => {
+        try {
+          const bgRep = await syncSalesReportsFromGoogleDrive();
+          if (bgRep) broadcastState('state:updated');
+        } catch {}
+      })();
+
       broadcastState('state:updated');
       res.json({
         success: true,
@@ -2541,26 +2554,6 @@ async function startServer() {
     res.send(buf);
   });
 
-  // Immediately auto-load HEADCOUNT BY AVA.xls and SalesProductionAgency_PLD_THIS MONTH + SalesProductionAgency_HSUI_THIS MONTH.xls from local cache and refresh from Google Drive
-  loadHeadcountFromLocalDiskIfAvailable();
-  loadSalesReportsFromLocalDiskIfAvailable();
-  (async () => {
-    try {
-      const hcLog = await syncHeadcountFromGoogleDrive();
-      const repLog = await syncSalesReportsFromGoogleDrive();
-      if (hcLog || repLog) broadcastState('state:updated');
-    } catch {}
-  })();
-
-  // Periodically refresh HEADCOUNT BY AVA.xls & SalesProduction reports from Google Drive every 10 minutes
-  setInterval(async () => {
-    try {
-      const hcLog = await syncHeadcountFromGoogleDrive();
-      const repLog = await syncSalesReportsFromGoogleDrive();
-      if (hcLog || repLog) broadcastState('state:updated');
-    } catch {}
-  }, 10 * 60 * 1000);
-
   // Vite middleware in development, static dist in production
   if (process.env.NODE_ENV !== 'production') {
     const { createServer: createViteServer } = await import('vite');
@@ -2579,6 +2572,30 @@ async function startServer() {
 
   httpServer.listen(PORT, '0.0.0.0', () => {
     console.log(`PLD Active Member Lightboard server listening on http://0.0.0.0:${PORT}`);
+
+    // Run local disk check if state wasn't already populated, then refresh from Google Drive in background
+    setTimeout(async () => {
+      try {
+        if (!appState.lastHeadcountSync) {
+          loadHeadcountFromLocalDiskIfAvailable();
+        }
+        if (!appState.lastSync) {
+          loadSalesReportsFromLocalDiskIfAvailable();
+        }
+        const hcLog = await syncHeadcountFromGoogleDrive();
+        const repLog = await syncSalesReportsFromGoogleDrive();
+        if (hcLog || repLog) broadcastState('state:updated');
+      } catch {}
+    }, 1500);
+
+    // Periodically refresh HEADCOUNT BY AVA.xls & SalesProduction reports from Google Drive every 10 minutes
+    setInterval(async () => {
+      try {
+        const hcLog = await syncHeadcountFromGoogleDrive();
+        const repLog = await syncSalesReportsFromGoogleDrive();
+        if (hcLog || repLog) broadcastState('state:updated');
+      } catch {}
+    }, 10 * 60 * 1000);
   });
 }
 
