@@ -1230,22 +1230,30 @@ export default function App() {
               <div className="p-5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <h2 className="text-base font-bold text-slate-900">
-                    全部 9 個團隊成員 · 當月 Requested Month (in total) FYCC 對照表
+                    全部團隊成員 · 當月 Requested Month (in total) FYCC 對照表
                   </h2>
                   <p className="text-xs text-slate-500 mt-0.5">
                     總亮燈人數：{agencyTotals.activeMembers} / {agencyTotals.totalActiveDenominator} Active Member · 總 FYCC：HK$ {agencyTotals.totalFycc.toLocaleString()}
                   </p>
                 </div>
 
-                <div className="relative w-full sm:w-72">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="搜尋成員英文姓名、別名或 Team..."
-                    className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#E87722]"
-                  />
+                <div className="flex flex-wrap items-center gap-4 ml-auto">
+                  <span className="text-lg sm:text-xl font-extrabold text-slate-900 underline decoration-2 decoration-[#E87722] underline-offset-4 font-mono tabular-nums">
+                    {(appState.reportDateDisplay || '6 Oct 2026').startsWith('報表結算日')
+                      ? appState.reportDateDisplay
+                      : `報表結算日：${appState.reportDateDisplay || '6 Oct 2026'}`}
+                  </span>
+
+                  <div className="relative w-full sm:w-72">
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="搜尋成員英文姓名、別名或 Team..."
+                      className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#E87722]"
+                    />
+                  </div>
                 </div>
               </div>
 

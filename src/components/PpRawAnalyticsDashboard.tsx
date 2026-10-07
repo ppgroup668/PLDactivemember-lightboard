@@ -1132,6 +1132,14 @@ export const PpRawAnalyticsDashboard: React.FC<PpRawAnalyticsDashboardProps> = (
               <span className="font-mono">FYC / FYP / 件數</span>
             </p>
           </div>
+
+          <div className="text-right ml-auto">
+            <span className="inline-block text-lg sm:text-xl md:text-2xl font-extrabold text-slate-900 underline decoration-2 decoration-[#E87722] underline-offset-4 font-mono tabular-nums">
+              {(appState.reportDateDisplay || '6 Oct 2026').startsWith('報表結算日')
+                ? appState.reportDateDisplay
+                : `報表結算日：${appState.reportDateDisplay || '6 Oct 2026'}`}
+            </span>
+          </div>
         </div>
 
         <div className="overflow-x-auto">

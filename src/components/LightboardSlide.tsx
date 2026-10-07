@@ -243,15 +243,17 @@ export const LightboardSlide: React.FC<LightboardSlideProps> = ({
               </h2>
             </div>
 
-            <div className="text-right">
+            <div className="text-right ml-auto">
               <span
                 className={`${
                   compactMode
-                    ? 'text-base sm:text-lg'
-                    : 'text-xl sm:text-2xl md:text-[28px]'
-                } font-bold text-[#2E3338] underline decoration-2 underline-offset-4 tabular-nums`}
+                    ? 'text-lg sm:text-xl'
+                    : 'text-2xl sm:text-3xl md:text-[32px]'
+                } font-extrabold text-[#2E3338] underline decoration-2 underline-offset-6 tabular-nums`}
               >
-                {reportDate}
+                {reportDate.startsWith('報表結算日')
+                  ? reportDate
+                  : `報表結算日：${reportDate || '6 Oct 2026'}`}
               </span>
             </div>
           </div>

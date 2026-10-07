@@ -218,13 +218,11 @@ export const CleanTeamBoard: React.FC<CleanTeamBoardProps> = ({
     <div className="space-y-6">
       {/* Top Team Header & High-Legibility KPI Summary Cards */}
       <div className="bg-white rounded-xl border border-slate-200 p-5 sm:p-6 shadow-[0_1px_3px_rgba(15,23,42,0.03)]">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          {/* Team Title & Date */}
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2.5 text-xs font-semibold text-slate-500">
+        {/* Top Row: Title on Left, Enlarged 報表結算日 on Top-Right Corner */}
+        <div className="flex flex-wrap items-start justify-between gap-4 pb-4 mb-4 border-b border-slate-100">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
               <span>當月 ACTIVE MEMBER 亮燈表</span>
-              <span aria-hidden="true">·</span>
-              <span>報表結算日：{reportDate}</span>
               <span aria-hidden="true">·</span>
               <span>以公司 Submissions Report 計算</span>
             </div>
@@ -236,8 +234,18 @@ export const CleanTeamBoard: React.FC<CleanTeamBoardProps> = ({
             </div>
           </div>
 
+          <div className="text-right ml-auto">
+            <span className="inline-block text-xl sm:text-2xl md:text-[28px] font-extrabold tracking-tight text-slate-900 underline decoration-2 decoration-[#E87722] underline-offset-6 font-mono tabular-nums">
+              {reportDate.startsWith('報表結算日')
+                ? reportDate
+                : `報表結算日：${reportDate || '6 Oct 2026'}`}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           {/* 2 Clear Formula KPI Blocks (Click to edit denominators) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 lg:min-w-[540px]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 w-full">
             {/* KPI 1: Active Member Ratio */}
             <div
               onClick={() => onEditTeamDenominators(team)}
