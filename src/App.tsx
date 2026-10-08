@@ -618,83 +618,40 @@ export default function App() {
         {/* Left Sidebar: Step 1 Auto-Loaded Google Drive Files, Step 2 District Filter & Teams Navigation */}
         <aside className="w-full lg:w-[290px] shrink-0 bg-white border-b lg:border-b-0 lg:border-r border-slate-200 p-4 flex flex-col justify-between gap-6">
           <div className="space-y-4">
-            {/* Step 1: Auto-Loaded Headcount & SalesProduction Reports from Google Drive */}
-            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/90 space-y-2.5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                  <FileSpreadsheet className="w-4 h-4 text-[#E87722]" />
-                  第一步：雲端自動載入
+            {/* Step 1: Ultra-Compact Auto-Loaded Google Drive Sync */}
+            <div className="p-2 rounded-lg bg-slate-50 border border-slate-200/90 space-y-1.5">
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[11px] font-bold text-slate-800 flex items-center gap-1">
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-[#E87722]" />
+                  雲端自動載入 ({appState.headcountRoster?.length || 1145}人)
                 </span>
-                <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-                  不用 Upload
-                </span>
+                <button
+                  type="button"
+                  onClick={handleSyncGdriveReports}
+                  className="px-2 py-0.5 text-[10px] font-bold text-white bg-slate-900 hover:bg-slate-800 rounded flex items-center gap-1 transition-colors cursor-pointer"
+                >
+                  <RotateCcw className="w-2.5 h-2.5 text-[#E87722]" />
+                  同步
+                </button>
               </div>
-
-              <div className="p-2.5 rounded-lg bg-white border border-slate-200/90 space-y-1">
-                <div className="flex items-center justify-between gap-1">
-                  <span className="text-[11px] font-bold text-slate-800 truncate">
-                    HEADCOUNT BY AVA.xls
-                  </span>
-                  <a
-                    href="https://drive.google.com/drive/folders/1d9k5SpBXItTqVYF2z3_6ZsKo5w4p8Tmn?usp=drive_link"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[10px] text-slate-500 hover:text-slate-900 underline shrink-0"
-                  >
-                    資料夾
-                  </a>
-                </div>
-                <div className="text-[10px] text-slate-500">
-                  已自動載入 {appState.headcountRoster?.length || 1145} 人 (Col D Name HKID)
-                </div>
-              </div>
-
-              <div className="p-2.5 rounded-lg bg-white border border-slate-200/90 space-y-1">
-                <div className="flex items-center justify-between gap-1">
-                  <span className="text-[11px] font-bold text-slate-800 truncate">
-                    PLD & HSUI THIS MONTH
-                  </span>
-                  <a
-                    href="https://drive.google.com/drive/folders/1pvxqsNTG8ur8V7InCaKVyelveDqMCMPS?usp=sharing"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[10px] text-slate-500 hover:text-slate-900 underline shrink-0"
-                  >
-                    報表夾
-                  </a>
-                </div>
-                <div className="text-[10px] text-slate-500 leading-snug">
-                  自動取出 <span className="font-mono text-slate-700">SalesProductionAgency_PLD_THIS MONTH</span> 及 <span className="font-mono text-slate-700">SalesProductionAgency_HSUI_THIS MONTH.xls</span> (Col T &gt; 0 亮綠燈)
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleSyncGdriveReports}
-                className="w-full py-2 px-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap"
-              >
-                <RotateCcw className="w-3.5 h-3.5 text-[#E87722]" />
-                重新同步 Google Drive 報表
-              </button>
-
               {quickUploadStatus && (
-                <div className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg p-2">
+                <div className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-1.5 py-1">
                   {quickUploadStatus}
                 </div>
               )}
             </div>
 
-            {/* Step 2: Sidebar Team Multi-Select Filter (分Team做選項) */}
-            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/90 space-y-2">
+            {/* Step 2: Compact Sidebar Team Filter */}
+            <div className="p-2 rounded-lg bg-slate-50 border border-slate-200/90 space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-900">
-                  第二步：分 Team 選項
+                <span className="text-[11px] font-bold text-slate-800">
+                  分 Team 選項
                 </span>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <button
                     type="button"
                     onClick={() => setSelectedDistricts([...allAvailableDistricts])}
-                    className="text-[11px] font-semibold text-slate-600 hover:underline cursor-pointer"
+                    className="text-[10px] font-semibold text-slate-600 hover:underline cursor-pointer"
                   >
                     全選
                   </button>
@@ -703,14 +660,14 @@ export default function App() {
                     onClick={() =>
                       setSelectedDistricts([...DEFAULT_SELECTED_DISTRICTS])
                     }
-                    className="text-[11px] font-bold text-[#E87722] hover:underline cursor-pointer"
+                    className="text-[10px] font-bold text-[#E87722] hover:underline cursor-pointer"
                   >
-                    重設預設
+                    預設
                   </button>
                 </div>
               </div>
 
-              <div className="space-y-1 max-h-[260px] overflow-y-auto pr-0.5">
+              <div className="space-y-0.5 max-h-[120px] overflow-y-auto pr-0.5">
                 {allAvailableDistricts.map((dist) => {
                   const checked = selectedDistricts.some(
                     (d) => canonicalizeHeadcountTeam(d) === dist.toUpperCase() || d.toUpperCase() === dist.toUpperCase()

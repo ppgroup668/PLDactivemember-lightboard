@@ -430,120 +430,110 @@ export const PpRawAnalyticsDashboard: React.FC<PpRawAnalyticsDashboardProps> = (
   };
 
   return (
-    <div className="space-y-6">
-      {/* Top 2-Step Workflow Banner: Step 1 (Upload Headcount / SalesProduction Report) & Step 2 (Multi-Select District Filter) */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-5">
-        {/* STEP 1: Only Upload Headcount / SalesProduction Report (5 cols) */}
-        <div className="xl:col-span-5 bg-white rounded-2xl border border-slate-200/90 shadow-xs p-5 flex flex-col justify-between gap-4">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 text-[11px] font-extrabold bg-[#E87722] text-white rounded-md uppercase tracking-wider">
-                第一步
-              </span>
-              <h2 className="text-base font-extrabold text-slate-900">
-                Google Drive 自動載入 Headcount & SalesProduction 報表
-              </h2>
-            </div>
-
-            <p className="text-xs text-slate-600 leading-relaxed">
-              系統已自動從 Google Drive 載入最新 <strong className="text-slate-800">HEADCOUNT BY AVA.xls</strong>（自動讀取 Column D Name (HKID)）並自動從雲端資料夾取出 <strong className="text-slate-800">SalesProductionAgency_PLD_THIS MONTH</strong> 及 <strong className="text-slate-800">SalesProductionAgency_HSUI_THIS MONTH.xls</strong>（讀取 Column T FYCC &gt; 0 計算 Active Member，無需手動上載）。
-            </p>
-          </div>
-
-          <div className="space-y-2.5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              <button
-                type="button"
-                onClick={async () => {
-                  setUploadStatus({
-                    type: 'loading',
-                    message: '正在從 Google Drive 自動同步 HEADCOUNT BY AVA.xls...',
+    <div className="space-y-4">
+      {/* Ultra-Compact Top Toolbar: Step 1 (Google Drive Sync) + Step 2 (Team Multi-Select & Filters) */}
+      <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs px-3 py-2 space-y-1.5">
+        {/* Row 1: Step 1 Sync Buttons + Step 2 Quick Actions + Inline Sub-Filters */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          {/* Step 1: Compact Google Drive Sync */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="px-1.5 py-0.5 text-[10px] font-extrabold bg-[#E87722] text-white rounded">
+              第一步
+            </span>
+            <span className="text-[11px] font-bold text-slate-700">
+              Google Drive 自動載入:
+            </span>
+            <button
+              type="button"
+              onClick={async () => {
+                setUploadStatus({
+                  type: 'loading',
+                  message: '同步 HEADCOUNT 中...',
+                });
+                try {
+                  const res = await fetch('/api/sync-gdrive-headcount', {
+                    method: 'POST',
                   });
-                  try {
-                    const res = await fetch('/api/sync-gdrive-headcount', {
-                      method: 'POST',
+                  const ct = res.headers.get('content-type') || '';
+                  if (res.ok && ct.includes('application/json')) {
+                    const data = await res.json();
+                    if (data.state) onStateUpdated(data.state);
+                    setUploadStatus({
+                      type: 'success',
+                      message: `已載入 HEADCOUNT (${data.headcountLog?.totalRows || 1145}人)`,
                     });
-                    const ct = res.headers.get('content-type') || '';
-                    if (res.ok && ct.includes('application/json')) {
-                      const data = await res.json();
-                      if (data.state) onStateUpdated(data.state);
-                      setUploadStatus({
-                        type: 'success',
-                        message: `已自動載入 Google Drive: ${data.headcountLog?.fileName || 'HEADCOUNT BY AVA.xls'} (${data.headcountLog?.totalRows || 1145} 人)`,
-                      });
-                    } else {
-                      if (PRELOADED_GDRIVE_STATE?.teams?.length) {
-                        onStateUpdated(PRELOADED_GDRIVE_STATE);
-                      }
-                      setUploadStatus({
-                        type: 'success',
-                        message: '已自動載入 Google Drive: HEADCOUNT BY AVA.xls (1145 人)',
-                      });
-                    }
-                  } catch {
+                  } else {
                     if (PRELOADED_GDRIVE_STATE?.teams?.length) {
                       onStateUpdated(PRELOADED_GDRIVE_STATE);
                     }
                     setUploadStatus({
                       type: 'success',
-                      message: '已自動載入 Google Drive: HEADCOUNT BY AVA.xls (1145 人)',
+                      message: '已載入 HEADCOUNT (1145人)',
                     });
                   }
-                }}
-                className="py-3 px-4 bg-[#E87722] hover:bg-[#d16819] text-white text-xs font-extrabold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer whitespace-nowrap"
-              >
-                <FileSpreadsheet className="w-4 h-4" />
-                同步 HEADCOUNT BY AVA.xls
-              </button>
-
-              <button
-                type="button"
-                onClick={async () => {
+                } catch {
+                  if (PRELOADED_GDRIVE_STATE?.teams?.length) {
+                    onStateUpdated(PRELOADED_GDRIVE_STATE);
+                  }
                   setUploadStatus({
-                    type: 'loading',
-                    message: '正在從 Google Drive 自動取出 PLD & HSUI THIS MONTH 報表...',
+                    type: 'success',
+                    message: '已載入 HEADCOUNT (1145人)',
                   });
-                  try {
-                    const res = await fetch('/api/sync-gdrive-reports', {
-                      method: 'POST',
+                }
+              }}
+              className="px-2 py-1 bg-[#E87722] hover:bg-[#d16819] text-white text-[11px] font-bold rounded-md flex items-center gap-1 transition-colors cursor-pointer whitespace-nowrap"
+            >
+              <FileSpreadsheet className="w-3 h-3" />
+              同步 HEADCOUNT
+            </button>
+
+            <button
+              type="button"
+              onClick={async () => {
+                setUploadStatus({
+                  type: 'loading',
+                  message: '同步 PLD & HSUI 中...',
+                });
+                try {
+                  const res = await fetch('/api/sync-gdrive-reports', {
+                    method: 'POST',
+                  });
+                  const ct = res.headers.get('content-type') || '';
+                  if (res.ok && ct.includes('application/json')) {
+                    const data = await res.json();
+                    if (data.state) onStateUpdated(data.state);
+                    setUploadStatus({
+                      type: 'success',
+                      message: `已載入 PLD & HSUI (${data.syncLog?.activatedNames?.length || 68}人亮燈)`,
                     });
-                    const ct = res.headers.get('content-type') || '';
-                    if (res.ok && ct.includes('application/json')) {
-                      const data = await res.json();
-                      if (data.state) onStateUpdated(data.state);
-                      setUploadStatus({
-                        type: 'success',
-                        message: `已自動載入 PLD & HSUI THIS MONTH：共 ${data.syncLog?.activatedNames?.length || 68} 位 Active Member 轉綠燈`,
-                      });
-                    } else {
-                      if (PRELOADED_GDRIVE_STATE?.teams?.length) {
-                        onStateUpdated(PRELOADED_GDRIVE_STATE);
-                      }
-                      setUploadStatus({
-                        type: 'success',
-                        message: `已自動載入 PLD & HSUI THIS MONTH：共 ${PRELOADED_GDRIVE_STATE?.lastSync?.activatedNames?.length || 68} 位 Active Member 轉綠燈`,
-                      });
-                    }
-                  } catch {
+                  } else {
                     if (PRELOADED_GDRIVE_STATE?.teams?.length) {
                       onStateUpdated(PRELOADED_GDRIVE_STATE);
                     }
                     setUploadStatus({
                       type: 'success',
-                      message: `已自動載入 PLD & HSUI THIS MONTH：共 ${PRELOADED_GDRIVE_STATE?.lastSync?.activatedNames?.length || 68} 位 Active Member 轉綠燈`,
+                      message: `已載入 PLD & HSUI (${PRELOADED_GDRIVE_STATE?.lastSync?.activatedNames?.length || 68}人亮燈)`,
                     });
                   }
-                }}
-                className="py-3 px-4 bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer whitespace-nowrap"
-              >
-                <FileSpreadsheet className="w-4 h-4 text-[#E87722]" />
-                同步 PLD & HSUI THIS MONTH
-              </button>
-            </div>
+                } catch {
+                  if (PRELOADED_GDRIVE_STATE?.teams?.length) {
+                    onStateUpdated(PRELOADED_GDRIVE_STATE);
+                  }
+                  setUploadStatus({
+                    type: 'success',
+                    message: `已載入 PLD & HSUI (${PRELOADED_GDRIVE_STATE?.lastSync?.activatedNames?.length || 68}人亮燈)`,
+                  });
+                }
+              }}
+              className="px-2 py-1 bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold rounded-md flex items-center gap-1 transition-colors cursor-pointer whitespace-nowrap"
+            >
+              <FileSpreadsheet className="w-3 h-3 text-[#E87722]" />
+              同步 PLD & HSUI
+            </button>
 
             {uploadStatus.type !== 'idle' && (
-              <div
-                className={`text-xs font-semibold px-3 py-2 rounded-lg border ${
+              <span
+                className={`text-[11px] font-semibold px-2 py-0.5 rounded border ${
                   uploadStatus.type === 'error'
                     ? 'bg-red-50 text-red-700 border-red-200'
                     : uploadStatus.type === 'loading'
@@ -552,173 +542,126 @@ export const PpRawAnalyticsDashboard: React.FC<PpRawAnalyticsDashboardProps> = (
                 }`}
               >
                 {uploadStatus.message}
-              </div>
+              </span>
             )}
           </div>
-        </div>
 
-        {/* STEP 2: Multi-Select Team Filter Card (7 cols) */}
-        <div className="xl:col-span-7 bg-white rounded-2xl border border-slate-200/90 shadow-xs p-5 flex flex-col justify-between gap-4">
-          <div className="space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 text-[11px] font-extrabold bg-slate-900 text-white rounded-md uppercase tracking-wider">
-                  第二步
-                </span>
-                <h2 className="text-base font-extrabold text-slate-900">
-                  分 Team 多選篩選器 (Multi-Select Team Filter)
-                </h2>
-              </div>
-
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => onChangeSelectedDistricts([...DEFAULT_SELECTED_DISTRICTS])}
-                  className="px-2.5 py-1 text-xs font-bold text-[#c45d12] bg-[#FFF5EC] hover:bg-[#ffead6] border border-[#E87722]/30 rounded-lg transition-colors cursor-pointer"
-                >
-                  預設 (PAGGIE LAW + JERRY LO)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onChangeSelectedDistricts([...allDistricts])}
-                  className="px-2.5 py-1 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
-                >
-                  全選所有 Team ({allDistricts.length})
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onChangeSelectedDistricts([])}
-                  className="px-2.5 py-1 text-xs font-semibold text-slate-500 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
-                >
-                  清除
-                </button>
-              </div>
-            </div>
-
-            <p className="text-xs text-slate-600">
-              根據 Headcount 檔案中的 <strong className="text-slate-900">Team</strong> 欄位分 Team 做選項（預設勾選{' '}
-              <strong className="text-slate-900">PAGGIE LAW</strong> 及{' '}
-              <strong className="text-slate-900">JERRY LO</strong>）。自由勾選或取消勾選不同 Team，下方儀表板的{' '}
-              <strong className="text-slate-900">FYC、FYP、件數及排行榜</strong> 會即時動態聯動更新。
-            </p>
-
-            {/* Multi-Select Team Checkboxes Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 pt-1 max-h-[240px] overflow-y-auto pr-1">
-              {allDistricts.map((district) => {
-                const isChecked = selectedDistricts.some(
-                  (d) =>
-                    canonicalizeHeadcountTeam(d) === district.toUpperCase() ||
-                    d.toUpperCase() === district.toUpperCase()
-                );
-                const isDefaultDistrict = DEFAULT_SELECTED_DISTRICTS.some(
-                  (d) => d.toUpperCase() === district.toUpperCase()
-                );
-                const stats = districtStatsMap.get(district.toUpperCase()) || {
-                  headcount: 0,
-                  activeCount: 0,
-                  fyc: 0,
-                  fyp: 0,
-                  cases: 0,
-                };
-
-                return (
-                  <button
-                    key={district}
-                    type="button"
-                    onClick={() => toggleDistrict(district)}
-                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 ${
-                      isChecked
-                        ? 'bg-[#FFF5EC] border-[#E87722] shadow-2xs'
-                        : 'bg-slate-50/70 border-slate-200 hover:bg-slate-100/80 text-slate-500'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-1.5 w-full">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        {isChecked ? (
-                          <CheckSquare className="w-4 h-4 text-[#E87722] shrink-0" />
-                        ) : (
-                          <Square className="w-4 h-4 text-slate-400 shrink-0" />
-                        )}
-                        <span
-                          className={`text-xs font-extrabold truncate ${
-                            isChecked ? 'text-slate-900' : 'text-slate-600'
-                          }`}
-                          title={district}
-                        >
-                          {district}
-                        </span>
-                      </div>
-                      {isDefaultDistrict && (
-                        <span className="px-1.5 py-0.5 text-[10px] font-bold bg-[#E87722]/15 text-[#c45d12] rounded shrink-0">
-                          預設
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center justify-between text-[11px] font-mono w-full pt-1 border-t border-slate-200/60">
-                      <span className="text-slate-600">
-                        人數: <strong>{stats.headcount}</strong> ({stats.activeCount} 亮燈)
-                      </span>
-                      <span
-                        className={
-                          stats.fyc > 0 ? 'font-bold text-[#15803D]' : 'text-slate-400'
-                        }
-                      >
-                        FYC {stats.fyc.toLocaleString()}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Sub-Filters: Team, Upline Manager, Search */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-slate-100">
-            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
-              <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+          {/* Right side: Inline Sub-Filters (Team, Upline, Search) */}
+          <div className="flex flex-wrap items-center gap-1.5 ml-auto">
+            <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-md px-2 py-0.5">
+              <Filter className="w-3 h-3 text-slate-400 shrink-0" />
               <select
                 value={selectedTeamFilter}
                 onChange={(e) => setSelectedTeamFilter(e.target.value)}
-                className="w-full text-xs font-semibold text-slate-700 bg-transparent focus:outline-none"
+                className="text-[11px] font-semibold text-slate-700 bg-transparent focus:outline-none"
               >
                 <option value="ALL">所有 Team ({availableTeams.length})</option>
                 {availableTeams.map((t) => (
                   <option key={t} value={t}>
-                    Team: {t}
+                    {t}
                   </option>
                 ))}
               </select>
             </div>
 
-            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
-              <GitBranch className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-md px-2 py-0.5">
+              <GitBranch className="w-3 h-3 text-slate-400 shrink-0" />
               <select
                 value={selectedManagerFilter}
                 onChange={(e) => setSelectedManagerFilter(e.target.value)}
-                className="w-full text-xs font-semibold text-slate-700 bg-transparent focus:outline-none"
+                className="text-[11px] font-semibold text-slate-700 bg-transparent focus:outline-none max-w-[140px]"
               >
-                <option value="ALL">
-                  所有上線經理 Upline ({availableManagers.length})
-                </option>
+                <option value="ALL">所有上線 ({availableManagers.length})</option>
                 {availableManagers.map((m) => (
                   <option key={m} value={m}>
-                    經理: {m}
+                    {m}
                   </option>
                 ))}
               </select>
             </div>
 
-            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
-              <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-md px-2 py-0.5">
+              <Search className="w-3 h-3 text-slate-400 shrink-0" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="搜尋 ARA Name / 經理 / Code..."
-                className="w-full text-xs font-semibold text-slate-800 bg-transparent focus:outline-none"
+                placeholder="搜尋姓名/Code..."
+                className="w-28 sm:w-36 text-[11px] font-semibold text-slate-800 bg-transparent focus:outline-none"
               />
             </div>
+          </div>
+        </div>
+
+        {/* Row 2: Ultra-Compact Step 2 Multi-Select Team Chips */}
+        <div className="flex flex-wrap items-center gap-1 pt-1 border-t border-slate-100">
+          <span className="px-1.5 py-0.5 text-[10px] font-extrabold bg-slate-900 text-white rounded">
+            第二步
+          </span>
+          <span className="text-[11px] font-bold text-slate-700 mr-0.5">
+            分 Team:
+          </span>
+          <button
+            type="button"
+            onClick={() => onChangeSelectedDistricts([...DEFAULT_SELECTED_DISTRICTS])}
+            className="px-1.5 py-0.5 text-[10px] font-bold text-[#c45d12] bg-[#FFF5EC] hover:bg-[#ffead6] border border-[#E87722]/30 rounded cursor-pointer"
+          >
+            預設
+          </button>
+          <button
+            type="button"
+            onClick={() => onChangeSelectedDistricts([...allDistricts])}
+            className="px-1.5 py-0.5 text-[10px] font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded cursor-pointer"
+          >
+            全選({allDistricts.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => onChangeSelectedDistricts([])}
+            className="px-1.5 py-0.5 text-[10px] font-semibold text-slate-500 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 rounded cursor-pointer mr-1"
+          >
+            清除
+          </button>
+
+          <div className="flex flex-wrap items-center gap-1">
+            {allDistricts.map((district) => {
+              const isChecked = selectedDistricts.some(
+                (d) =>
+                  canonicalizeHeadcountTeam(d) === district.toUpperCase() ||
+                  d.toUpperCase() === district.toUpperCase()
+              );
+              const stats = districtStatsMap.get(district.toUpperCase()) || {
+                headcount: 0,
+                activeCount: 0,
+                fyc: 0,
+                fyp: 0,
+                cases: 0,
+              };
+
+              return (
+                <button
+                  key={district}
+                  type="button"
+                  onClick={() => toggleDistrict(district)}
+                  title={`${district} · 人數: ${stats.headcount} (${stats.activeCount} 亮燈) · FYC: ${stats.fyc.toLocaleString()}`}
+                  className={`px-2 py-0.5 rounded border text-[11px] transition-all cursor-pointer inline-flex items-center gap-1 ${
+                    isChecked
+                      ? 'bg-[#FFF5EC] border-[#E87722] text-slate-900 font-bold'
+                      : 'bg-slate-50/70 border-slate-200 hover:bg-slate-100 text-slate-500 font-medium'
+                  }`}
+                >
+                  {isChecked ? (
+                    <CheckSquare className="w-3 h-3 text-[#E87722] shrink-0" />
+                  ) : (
+                    <Square className="w-3 h-3 text-slate-400 shrink-0" />
+                  )}
+                  <span className="truncate max-w-[110px]">{district}</span>
+                  <span className="text-[10px] font-mono text-slate-400">
+                    ({stats.activeCount}/{stats.headcount})
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
