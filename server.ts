@@ -22,6 +22,7 @@ import {
   extractChineseName,
   extractEnglishName,
   getAllMembersOfTeam,
+  personNamesMatch,
 } from './src/shared/teamsData.ts';
 
 dotenv.config();
@@ -710,11 +711,16 @@ function processReportGrid(
           cases: caseVal,
         });
 
-        // Match against Active Member board
-        rowAgent = matchMemberInCell(rawAgentName, allMembers);
-        if (!rowAgent && rawAgentCode) {
+        // Match against Active Member board: strictly match by Agent Code first when present!
+        if (rawAgentCode) {
           rowAgent =
             allMembers.find((item) => item.member.agentCode === rawAgentCode) || null;
+        }
+        if (!rowAgent) {
+          const uncodedMembers = rawAgentCode
+            ? allMembers.filter((item) => !item.member.agentCode)
+            : allMembers;
+          rowAgent = matchMemberInCell(rawAgentName, uncodedMembers);
         }
       }
     } else {
@@ -835,13 +841,7 @@ function processReportGrid(
 
     // 2. Calculate Team Headcount & Active for each Team when structured ManagerEN + Agent NameEN rows are present!
     const nameMatchesMember = (rowName: string, memberFullName: string): boolean => {
-      const nRow = normalizeName(rowName);
-      const nMem = normalizeName(memberFullName);
-      if (!nRow || !nMem) return false;
-      if (nRow === nMem || nRow.includes(nMem) || nMem.includes(nRow)) return true;
-      const memTokens = nMem.split(' ').filter(Boolean);
-      const rowTokens = nRow.split(' ').filter(Boolean);
-      return memTokens.length >= 2 && memTokens.every((t) => rowTokens.includes(t));
+      return personNamesMatch(rowName, memberFullName);
     };
 
     if (structuredAgentRows.length > 0) {
@@ -927,11 +927,15 @@ function processReportGrid(
     // First sync from structuredAgentRows if available
     if (structuredAgentRows.length > 0) {
       for (const rRow of structuredAgentRows) {
-        let foundHc = appState.headcountRoster.find(
-          (hc) =>
-            (rRow.agentCode && hc.agentCode === rRow.agentCode) ||
-            nameMatchesMember(rRow.agentNameEN, hc.araName)
-        );
+        let foundHc =
+          (rRow.agentCode
+            ? appState.headcountRoster.find((hc) => hc.agentCode === rRow.agentCode)
+            : undefined) ||
+          appState.headcountRoster.find(
+            (hc) =>
+              (!hc.agentCode || !rRow.agentCode) &&
+              nameMatchesMember(rRow.agentNameEN, hc.araName)
+          );
         if (foundHc) {
           foundHc.fyc = rRow.fycc;
           foundHc.fyp = rRow.fyp;
@@ -981,11 +985,17 @@ function processReportGrid(
     } else {
       // Otherwise sync from memberResults
       for (const [, resItem] of memberResults.entries()) {
-        const foundHc = appState.headcountRoster.find(
-          (hc) =>
-            (resItem.member.agentCode && hc.agentCode === resItem.member.agentCode) ||
-            nameMatchesMember(resItem.member.fullName, hc.araName)
-        );
+        const foundHc =
+          (resItem.member.agentCode
+            ? appState.headcountRoster.find(
+                (hc) => hc.agentCode === resItem.member.agentCode
+              )
+            : undefined) ||
+          appState.headcountRoster.find(
+            (hc) =>
+              (!hc.agentCode || !resItem.member.agentCode) &&
+              nameMatchesMember(resItem.member.fullName, hc.araName)
+          );
         if (foundHc) {
           foundHc.fyc = resItem.fycc;
           foundHc.fyp = resItem.fyp;
@@ -2279,9 +2289,9 @@ async function startServer() {
   app.all('/api/sync-gdrive-headcount', async (_req, res) => {
     try {
       const headcountLog =
-        appState.lastHeadcountSync || loadHeadcountFromLocalDiskIfAvailable();
+        loadHeadcountFromLocalDiskIfAvailable() || appState.lastHeadcountSync;
       const syncLog =
-        appState.lastSync || loadSalesReportsFromLocalDiskIfAvailable();
+        loadSalesReportsFromLocalDiskIfAvailable() || appState.lastSync;
 
       // Trigger background Google Drive refresh without blocking the HTTP response
       (async () => {
@@ -2311,7 +2321,7 @@ async function startServer() {
   app.all('/api/sync-gdrive-reports', async (_req, res) => {
     try {
       const syncLog =
-        appState.lastSync || loadSalesReportsFromLocalDiskIfAvailable();
+        loadSalesReportsFromLocalDiskIfAvailable() || appState.lastSync;
 
       // Trigger background Google Drive refresh without blocking the HTTP response
       (async () => {

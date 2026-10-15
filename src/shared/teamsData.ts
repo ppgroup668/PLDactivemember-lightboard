@@ -191,7 +191,7 @@ export function canonicalizeHeadcountTeam(raw?: string): string {
   return upper;
 }
 
-export const STATE_VERSION = 7;
+export const STATE_VERSION = 8;
 
 export const INITIAL_TEAMS_DATA: TeamBoard[] = [
   {
@@ -442,7 +442,7 @@ export const INITIAL_TEAMS_DATA: TeamBoard[] = [
           { id: 'braver-6', agentCode: '608007', fullName: 'NG YING SEE', nickname: 'ARIEL', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
           { id: 'braver-7', agentCode: '608911', fullName: 'LEUNG KA YAN', nickname: 'KAREN', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
           { id: 'braver-8', agentCode: '609110', fullName: 'LAM TIN YING', nickname: 'TERESA', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
-          { id: 'braver-9', agentCode: '608315', fullName: 'LAI NGAI TAK', nickname: 'VERONICA', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
+          { id: 'braver-9', agentCode: '608315', fullName: 'LAI NGA TAK', nickname: 'VERONICA', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
           { id: 'braver-10', agentCode: '609153', fullName: 'LAU NGAI MING', nickname: 'GARY', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
           { id: 'braver-11', agentCode: '609369', fullName: 'LEUNG CHIU YI', nickname: 'RITA', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
           { id: 'braver-12', agentCode: '609434', fullName: 'YIU CHUNG MAN', nickname: 'LEO', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
@@ -701,8 +701,23 @@ export function personNamesMatch(nameA?: string, nameB?: string): boolean {
   if (tokensA.length >= 2 && tokensB.length >= 2) {
     const [shorter, longer] =
       tokensA.length <= tokensB.length ? [tokensA, tokensB] : [tokensB, tokensA];
-    if (shorter.join(' ').length >= 5 && shorter.every((t) => longer.includes(t))) {
+    // Shorter name must be a contiguous prefix in the exact same token order
+    // (Prevents "LAM LOK" matching "LAM WAN LOK" or "MAN YAN" matching "YAN TAT MAN")
+    const isExactPrefix = shorter.every((t, idx) => longer[idx] === t);
+    if (!isExactPrefix) return false;
+
+    // A 3+ token Chinese HKID name (e.g. "LIU YAN TING" -> "LIU YAN TING LOIS") matches when English nickname is appended
+    if (shorter.length >= 3) {
       return true;
+    }
+
+    // For a 2-token name vs 3-token name: only match if the 2nd token is a 5+ letter Mainland given name
+    // (e.g. "JIANG YIWEN" -> "JIANG YIWEN MICHELLE") or the 3rd token is a 5+ letter English nickname
+    // (Prevents 2-character "LIU YAN" matching 3-character "LIU YAN TING" or "LI CHUN" matching "LI CHUN NA")
+    if (shorter.length === 2 && longer.length === 3) {
+      if (shorter[1].length >= 5 || longer[2].length >= 5) {
+        return true;
+      }
     }
   }
   return false;
@@ -794,7 +809,7 @@ export const KNOWN_AGENT_FULL_NAMES_BY_CODE: Record<
   '608216': { fullName: 'LAI WAI HO', nickname: 'CLARENCE' },
   '608224': { fullName: 'YAN TAT MAN AMEN', nickname: 'AMEN' },
   '608301': { fullName: 'TSOI WING YIN' },
-  '608315': { fullName: 'LAI NGAI TAK', nickname: 'VERONICA' },
+  '608315': { fullName: 'LAI NGA TAK', nickname: 'VERONICA' },
   '608316': { fullName: 'XU SHENGJIA', nickname: 'ERIC' },
   '608348': { fullName: 'LIU YAN TING LOIS', nickname: 'LOIS' },
   '608349': { fullName: 'CHENG WAI YEE', nickname: 'DAISY' },
@@ -1036,12 +1051,17 @@ export function allocateTeamHeadcountsFromRoster(
     const teamBoardMembers = getAllMembersOfTeam(team);
     const teamManagers = teamBoardMembers.filter((m) => m.isLeaderRow);
 
-    // Find Top Leader row in roster
-    const rootEntry = roster.find(
-      (r) =>
-        (topInfo.code && r.agentCode === topInfo.code) ||
+    // Find Top Leader row in roster: strictly match by Agent Code first across the entire roster!
+    const rootEntry =
+      (topInfo.code
+        ? roster.find((r) => (r.agentCode || '').trim() === topInfo.code)
+        : undefined) ||
+      roster.find(
+        (r) => extractEnglishName(r.nameHkid || r.araName) === topInfo.name
+      ) ||
+      roster.find((r) =>
         personNamesMatch(r.nameHkid || r.araName, topInfo.name)
-    );
+      );
 
     if (!rootEntry) continue;
 
@@ -1068,7 +1088,8 @@ export function allocateTeamHeadcountsFromRoster(
         const candName = extractEnglishName(candidate.nameHkid || candidate.araName);
         const isOtherTeamTopLeader =
           (candCode && candCode !== topInfo.code && allTopLeaderCodes.has(candCode)) ||
-          (candName &&
+          (!candCode &&
+            candName &&
             !personNamesMatch(candName, topInfo.name) &&
             allTopLeaderNames.some((tlName) => personNamesMatch(candName, tlName)));
         if (isOtherTeamTopLeader) continue;
@@ -1114,10 +1135,11 @@ export function allocateTeamHeadcountsFromRoster(
     };
 
     const isOnActiveBoard = (entry: HeadcountRosterEntry): boolean => {
-      return teamBoardMembers.some(
-        (bm) =>
-          (entry.agentCode && bm.agentCode === entry.agentCode) ||
-          personNamesMatch(bm.fullName, entry.nameHkid || entry.araName)
+      if (entry.agentCode) {
+        return teamBoardMembers.some((bm) => bm.agentCode === entry.agentCode);
+      }
+      return teamBoardMembers.some((bm) =>
+        personNamesMatch(bm.fullName, entry.nameHkid || entry.araName)
       );
     };
 
@@ -1176,18 +1198,18 @@ export function allocateTeamHeadcountsFromRoster(
 
     if (subtree.length > 0) {
       team.headcountMembers = subtree.map(({ entry, tier, uplineDisplay }) => {
-        const boardMatch = teamBoardMembers.find(
-          (bm) =>
-            (entry.agentCode && bm.agentCode === entry.agentCode) ||
-            personNamesMatch(bm.fullName, entry.nameHkid || entry.araName)
-        );
+        const boardMatch = entry.agentCode
+          ? teamBoardMembers.find((bm) => bm.agentCode === entry.agentCode)
+          : teamBoardMembers.find((bm) =>
+              personNamesMatch(bm.fullName, entry.nameHkid || entry.araName)
+            );
         const isManagerRow =
           tier === 0 ||
-          teamManagers.some(
-            (mgr) =>
-              (entry.agentCode && mgr.agentCode === entry.agentCode) ||
-              personNamesMatch(mgr.fullName, entry.nameHkid || entry.araName)
-          );
+          (entry.agentCode
+            ? teamManagers.some((mgr) => mgr.agentCode === entry.agentCode)
+            : teamManagers.some((mgr) =>
+                personNamesMatch(mgr.fullName, entry.nameHkid || entry.araName)
+              ));
         const effectiveFycc =
           entry.fyc > 0
             ? entry.fyc
@@ -1252,11 +1274,9 @@ export function getTeamMetrics(team: TeamBoard) {
   const totalHeadcountActive = hasSyncedHeadcount
     ? team.headcountMembers!.filter((hm) => {
         if (hm.fycc > 0 || hm.isActive) return true;
-        const boardMatch = members.find(
-          (m) =>
-            (hm.agentCode && m.agentCode === hm.agentCode) ||
-            personNamesMatch(hm.agentNameEN, m.fullName)
-        );
+        const boardMatch = hm.agentCode
+          ? members.find((m) => m.agentCode === hm.agentCode)
+          : members.find((m) => personNamesMatch(hm.agentNameEN, m.fullName));
         return Boolean(boardMatch && (boardMatch.isActive || boardMatch.fycc > 0));
       }).length
     : teamHeadcountDenominator > 0

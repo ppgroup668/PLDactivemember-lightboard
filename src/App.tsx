@@ -36,6 +36,7 @@ import { CleanTeamBoard } from './components/CleanTeamBoard.tsx';
 import { LightboardSlide } from './components/LightboardSlide.tsx';
 import { PpRawAnalyticsDashboard } from './components/PpRawAnalyticsDashboard.tsx';
 import { ReportUploadModal } from './components/ReportUploadModal.tsx';
+import { exportAllTeamsOriginalPdf } from './utils/exportLightboardPdf.ts';
 import preloadedStateJson from './shared/preloadedState.json';
 
 const PRELOADED_GDRIVE_STATE = preloadedStateJson as unknown as AppState;
@@ -65,6 +66,7 @@ export default function App() {
   const [isRosterEditMode, setIsRosterEditMode] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [quickUploadStatus, setQuickUploadStatus] = useState<string | null>(null);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Member inspection / manual FYCC / Name / Role / Delete modal state
@@ -469,6 +471,28 @@ export default function App() {
     }
   };
 
+  const handleDownloadOriginalPdf = async () => {
+    if (isExportingPdf) return;
+    setIsExportingPdf(true);
+    setQuickUploadStatus(
+      `正在生成原版簡報多頁 PDF (共 ${appState.teams.length} 頁)...`
+    );
+    try {
+      await exportAllTeamsOriginalPdf(
+        appState.teams,
+        appState.reportDateDisplay || '6 Oct 2026'
+      );
+      setQuickUploadStatus(
+        `已下載原版多頁 PDF (全套 ${appState.teams.length} 頁)`
+      );
+    } catch (err: any) {
+      console.error('Failed to export PDF:', err);
+      setQuickUploadStatus(`PDF 下載失敗：${err?.message || '請重試'}`);
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
+
   const openMemberModal = (member: MemberRecord, team: TeamBoard) => {
     setEditingMember({
       member,
@@ -600,6 +624,19 @@ export default function App() {
           >
             <Users className="w-3.5 h-3.5" />
             {isRosterEditMode ? '完成名單編排' : '季初名單加名 / Delete'}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleDownloadOriginalPdf}
+            disabled={isExportingPdf}
+            title="下載全套 10 隊原版簡報格式多頁 PDF 樣本（可直接發給老闆）"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-slate-900 rounded-lg hover:bg-slate-800 disabled:opacity-60 transition-colors cursor-pointer whitespace-nowrap shadow-2xs"
+          >
+            <Download className="w-3.5 h-3.5 text-[#E87722]" />
+            {isExportingPdf
+              ? '正在生成 PDF...'
+              : `下載原版多頁 PDF (${appState.teams.length}頁)`}
           </button>
 
           <button
@@ -815,6 +852,18 @@ export default function App() {
               </div>
             </div>
 
+            <button
+              type="button"
+              onClick={handleDownloadOriginalPdf}
+              disabled={isExportingPdf}
+              className="w-full py-2 px-3 text-xs font-bold text-white bg-[#E87722] hover:bg-[#d16819] disabled:opacity-60 rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+            >
+              <Download className="w-3.5 h-3.5" />
+              {isExportingPdf
+                ? '正在生成原版多頁 PDF...'
+                : `下載原版多頁 PDF (全套 ${appState.teams.length} 頁)`}
+            </button>
+
             <div className="flex items-center justify-between gap-2">
               <button
                 type="button"
@@ -921,6 +970,18 @@ export default function App() {
                   className="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer whitespace-nowrap"
                 >
                   設定日期與分母 ({appState.reportDateDisplay})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleDownloadOriginalPdf}
+                  disabled={isExportingPdf}
+                  className="px-3 py-1.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 disabled:opacity-60 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap"
+                >
+                  <Download className="w-3.5 h-3.5 text-[#E87722]" />
+                  {isExportingPdf
+                    ? '生成 PDF 中...'
+                    : `下載原版多頁 PDF (${appState.teams.length}頁)`}
                 </button>
 
                 <button
