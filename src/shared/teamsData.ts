@@ -191,7 +191,7 @@ export function canonicalizeHeadcountTeam(raw?: string): string {
   return upper;
 }
 
-export const STATE_VERSION = 8;
+export const STATE_VERSION = 9;
 
 export const INITIAL_TEAMS_DATA: TeamBoard[] = [
   {
@@ -207,8 +207,8 @@ export const INITIAL_TEAMS_DATA: TeamBoard[] = [
         id: 'pld-l1',
         members: [
           { id: 'pld-1', agentCode: '603207', fullName: 'LAW SUK KING', nickname: 'PAGGIE', isLeaderRow: true, isActive: false, fycc: 0 },
-          { id: 'pld-2', agentCode: '606745', fullName: 'TANG SAU WAI', nickname: 'ANGELA', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: 'payme' },
-          { id: 'pld-3', agentCode: '607070', fullName: 'YUEN WING CHI', nickname: 'REBECCA', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '25/9/2026' },
+          { id: 'pld-2', agentCode: '606745', fullName: 'TANG SAU WAI', nickname: 'ANGELA', isLeaderRow: false, isActive: true, fycc: 18001, q4PaymentDate: 'payme' },
+          { id: 'pld-3', agentCode: '607070', fullName: 'YUEN WING CHI', nickname: 'REBECCA', isLeaderRow: false, isActive: true, fycc: 11988.74, q4PaymentDate: '25/9/2026' },
         ],
       },
     ],
@@ -225,7 +225,7 @@ export const INITIAL_TEAMS_DATA: TeamBoard[] = [
         members: [
           { id: 'pld-6', agentCode: '608428', fullName: 'CHONG CHUN TAK', nickname: 'JOHNNY', isLeaderRow: true, isActive: false, fycc: 0, q4PaymentDate: '30/9/2026' },
           { id: 'pld-7', agentCode: '609003', fullName: 'WONG JANIS', nickname: '', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '30/9/2026' },
-          { id: 'pld-8', agentCode: '609206', fullName: 'LAM CHI KONG', nickname: 'ALEX', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
+          { id: 'pld-8', agentCode: '609206', fullName: 'LAM CHI KONG', nickname: 'ALEX', isLeaderRow: false, isActive: true, fycc: 80506.11, q4PaymentDate: '29/9/2026' },
         ],
       },
     ],
@@ -271,10 +271,10 @@ export const INITIAL_TEAMS_DATA: TeamBoard[] = [
         id: 'sigma-l1',
         members: [
           { id: 'sigma-1', agentCode: '603646', fullName: 'YEUNG WAI SIN', nickname: 'TEANNIE', isLeaderRow: true, isActive: false, fycc: 0, q4PaymentDate: '24/9/2026' },
-          { id: 'sigma-2', agentCode: '606453', fullName: 'LEE KIN TING', nickname: 'MARTIN', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '24/9/2026' },
+          { id: 'sigma-2', agentCode: '606453', fullName: 'LEE KIN TING', nickname: 'MARTIN', isLeaderRow: false, isActive: true, fycc: 23509.5, q4PaymentDate: '24/9/2026' },
           { id: 'sigma-3', agentCode: '606110', fullName: 'LEE WING YAN', nickname: 'VIVIAN', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '24/9/2026' },
-          { id: 'sigma-4', agentCode: '603961', fullName: 'YU YUEN MAY', nickname: 'FIONA', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '24/9/2026' },
-          { id: 'sigma-5', agentCode: '609461', fullName: 'HO CHOI LAM', nickname: 'GLORIA', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '24/9/2026' },
+          { id: 'sigma-4', agentCode: '603961', fullName: 'YU YUEN MAY', nickname: 'FIONA', isLeaderRow: false, isActive: true, fycc: 14772.46, q4PaymentDate: '24/9/2026' },
+          { id: 'sigma-5', agentCode: '609461', fullName: 'HO CHOI LAM', nickname: 'GLORIA', isLeaderRow: false, isActive: true, fycc: 15000, q4PaymentDate: '24/9/2026' },
           { id: 'sigma-6', agentCode: '609458', fullName: 'FANG JING', nickname: 'JANE', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '24/9/2026' },
         ],
       },
@@ -338,7 +338,7 @@ export const INITIAL_TEAMS_DATA: TeamBoard[] = [
         id: 'tl-l1',
         members: [
           { id: 'tl-1', agentCode: '603446', fullName: 'LAM WAN LOK', nickname: 'TIMOTHY', isLeaderRow: true, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
-          { id: 'tl-2', agentCode: '603569', fullName: 'WONG MAN KUEN', nickname: 'KOJI', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
+          { id: 'tl-2', agentCode: '603569', fullName: 'WONG MAN KUEN', nickname: 'KOJI', isLeaderRow: false, isActive: true, fycc: 18001.81, q4PaymentDate: '29/9/2026' },
           { id: 'tl-3', agentCode: '609067', fullName: 'CHUNG CHIN PANG', nickname: 'DICK', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
           { id: 'tl-4', agentCode: '608918', fullName: 'ZENG HIU NGAI', nickname: 'NERO', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
         ],
@@ -404,7 +404,7 @@ export const INITIAL_TEAMS_DATA: TeamBoard[] = [
         id: 'unique-r1',
         members: [
           { id: 'unique-5', agentCode: '607494', fullName: 'CHAU WING HUNG', nickname: 'WINNIE', isLeaderRow: true, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
-          { id: 'unique-6', agentCode: '608130', fullName: 'SIU HOI NAP', nickname: 'VINCENT', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
+          { id: 'unique-6', agentCode: '608130', fullName: 'SIU HOI NAP', nickname: 'VINCENT', isLeaderRow: false, isActive: true, fycc: 45897.93, q4PaymentDate: '29/9/2026' },
           { id: 'unique-7', agentCode: '609060', fullName: 'KONG CHING MAN', nickname: 'ASTOR', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
           { id: 'unique-8', agentCode: '609469', fullName: 'YAU SHUK LING', nickname: 'BETTY', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '25/9/2026' },
         ],
@@ -423,7 +423,7 @@ export const INITIAL_TEAMS_DATA: TeamBoard[] = [
       {
         id: 'braver-l1',
         members: [
-          { id: 'braver-1', agentCode: '603837', fullName: 'LO CHAK WAI', nickname: 'JERRY', isLeaderRow: true, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
+          { id: 'braver-1', agentCode: '603837', fullName: 'LO CHAK WAI', nickname: 'JERRY', isLeaderRow: true, isActive: true, fycc: 52870.49, q4PaymentDate: '29/9/2026' },
         ],
       },
       {
@@ -439,12 +439,12 @@ export const INITIAL_TEAMS_DATA: TeamBoard[] = [
         members: [
           { id: 'braver-4', agentCode: '607657', fullName: 'NG KA LEUNG', nickname: 'ALEX', isLeaderRow: true, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
           { id: 'braver-5', agentCode: '607827', fullName: 'LUN HO MAN', nickname: 'VINCENT', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
-          { id: 'braver-6', agentCode: '608007', fullName: 'NG YING SEE', nickname: 'ARIEL', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
-          { id: 'braver-7', agentCode: '608911', fullName: 'LEUNG KA YAN', nickname: 'KAREN', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
+          { id: 'braver-6', agentCode: '608007', fullName: 'NG YING SEE', nickname: 'ARIEL', isLeaderRow: false, isActive: true, fycc: 6686.69, q4PaymentDate: '29/9/2026' },
+          { id: 'braver-7', agentCode: '608911', fullName: 'LEUNG KA YAN', nickname: 'KAREN', isLeaderRow: false, isActive: true, fycc: 14256.06, q4PaymentDate: '29/9/2026' },
           { id: 'braver-8', agentCode: '609110', fullName: 'LAM TIN YING', nickname: 'TERESA', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
           { id: 'braver-9', agentCode: '608315', fullName: 'LAI NGA TAK', nickname: 'VERONICA', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
           { id: 'braver-10', agentCode: '609153', fullName: 'LAU NGAI MING', nickname: 'GARY', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
-          { id: 'braver-11', agentCode: '609369', fullName: 'LEUNG CHIU YI', nickname: 'RITA', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
+          { id: 'braver-11', agentCode: '609369', fullName: 'LEUNG CHIU YI', nickname: 'RITA', isLeaderRow: false, isActive: true, fycc: 8371.85, q4PaymentDate: '29/9/2026' },
           { id: 'braver-12', agentCode: '609434', fullName: 'YIU CHUNG MAN', nickname: 'LEO', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
         ],
       },
@@ -463,7 +463,7 @@ export const INITIAL_TEAMS_DATA: TeamBoard[] = [
         id: 'braver-r2',
         members: [
           { id: 'braver-18', agentCode: '608932', fullName: 'TSE WAI KONG', nickname: 'WILSON', isLeaderRow: true, isActive: false, fycc: 0, q4PaymentDate: '29/9/2026' },
-          { id: 'braver-19', agentCode: '609199', fullName: 'POON YAN WO', nickname: 'WALLACE', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '30/9/2026' },
+          { id: 'braver-19', agentCode: '609199', fullName: 'POON YAN WO', nickname: 'WALLACE', isLeaderRow: false, isActive: true, fycc: 4345.34, q4PaymentDate: '30/9/2026' },
           { id: 'braver-21', agentCode: '609292', fullName: 'LAU SHAN YING', nickname: 'KENNIX', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '30/9/2026' },
           { id: 'braver-23', agentCode: '609466', fullName: 'WU LOK YI', nickname: 'JOYCE', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '30/9/2026' },
         ],
@@ -495,13 +495,13 @@ export const INITIAL_TEAMS_DATA: TeamBoard[] = [
       {
         id: 'inc-l3',
         members: [
-          { id: 'inc-4', agentCode: '603279', fullName: 'TAM PAN', nickname: 'GARY', isLeaderRow: true, isActive: false, fycc: 0, q4PaymentDate: '24/9/2026' },
+          { id: 'inc-4', agentCode: '603279', fullName: 'TAM PAN', nickname: 'GARY', isLeaderRow: true, isActive: true, fycc: 3087.66, q4PaymentDate: '24/9/2026' },
         ],
       },
       {
         id: 'inc-l4',
         members: [
-          { id: 'inc-5', agentCode: '607457', fullName: 'WONG TSZ YAN', nickname: 'YANNES', isLeaderRow: true, isActive: false, fycc: 0, q4PaymentDate: '24/9/2026' },
+          { id: 'inc-5', agentCode: '607457', fullName: 'WONG TSZ YAN', nickname: 'YANNES', isLeaderRow: true, isActive: true, fycc: 13600, q4PaymentDate: '24/9/2026' },
         ],
       },
     ],
@@ -516,7 +516,7 @@ export const INITIAL_TEAMS_DATA: TeamBoard[] = [
       {
         id: 'inc-r2',
         members: [
-          { id: 'inc-8', agentCode: '607455', fullName: 'CHU WING WA', nickname: 'VINCENT', isLeaderRow: true, isActive: false, fycc: 0, q4PaymentDate: '24/9/2026' },
+          { id: 'inc-8', agentCode: '607455', fullName: 'CHU WING WA', nickname: 'VINCENT', isLeaderRow: true, isActive: true, fycc: 26908.45, q4PaymentDate: '24/9/2026' },
           { id: 'inc-9', agentCode: '609091', fullName: 'SO SIN CHING', nickname: 'SUZY', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '24/9/2026' },
         ],
       },
@@ -541,9 +541,9 @@ export const INITIAL_TEAMS_DATA: TeamBoard[] = [
         id: 'asg-l1',
         members: [
           { id: 'asg-1', agentCode: '603318', fullName: 'TSE MAN PO', nickname: 'ANDY', isLeaderRow: true, isActive: false, fycc: 0, q4PaymentDate: '30/9/2026' },
-          { id: 'asg-2', agentCode: '603310', fullName: 'CHOW YUEN LAM', nickname: 'SHARON', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '30/9/2026' },
+          { id: 'asg-2', agentCode: '603310', fullName: 'CHOW YUEN LAM', nickname: 'SHARON', isLeaderRow: false, isActive: true, fycc: 3000, q4PaymentDate: '30/9/2026' },
           { id: 'asg-3', agentCode: '603307', fullName: 'CHU CHUN', nickname: 'MATTHEW', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '30/9/2026' },
-          { id: 'asg-4', agentCode: '606070', fullName: 'CHIU PANG TAT', nickname: 'ANDREW', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '30/9/2026' },
+          { id: 'asg-4', agentCode: '606070', fullName: 'CHIU PANG TAT', nickname: 'ANDREW', isLeaderRow: false, isActive: true, fycc: 3000, q4PaymentDate: '30/9/2026' },
           { id: 'asg-5', agentCode: '603309', fullName: 'CHAN CHUN YIN', nickname: 'BILLY', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '30/9/2026' },
           { id: 'asg-6', agentCode: '603298', fullName: 'MOK PAK YUEN', nickname: 'RYAN', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '30/9/2026' },
           { id: 'asg-7', agentCode: '603306', fullName: 'YUN SHING HUNG', nickname: 'INSON', isLeaderRow: false, isActive: false, fycc: 0, q4PaymentDate: '30/9/2026' },

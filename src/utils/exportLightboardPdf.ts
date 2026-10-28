@@ -348,6 +348,49 @@ function renderTeamSlideToCanvas(
   );
   ctx.restore();
 
+  // 7. Bottom-Left Color Legend ("綠色姓名 = 當月 FYCC 非 0 已亮燈" & "深藍色姓名 = 預設未亮燈")
+  ctx.save();
+  const legendY = cardY + cardH - 36;
+
+  // Dot 1: Dark Navy Dot
+  ctx.beginPath();
+  ctx.arc(innerLeft + 10, legendY, 7, 0, Math.PI * 2);
+  ctx.fillStyle = '#182650';
+  ctx.fill();
+
+  ctx.font = `700 20px ${fontStack}`;
+  ctx.fillStyle = '#182650';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('深藍色姓名 ', innerLeft + 26, legendY);
+  const blueLabelW = ctx.measureText('深藍色姓名 ').width;
+
+  ctx.font = `500 20px ${fontStack}`;
+  ctx.fillStyle = '#475569';
+  ctx.fillText('= 預設未亮燈 (FYCC 為 0)', innerLeft + 26 + blueLabelW, legendY);
+  const blueDescW = ctx.measureText('= 預設未亮燈 (FYCC 為 0)').width;
+
+  const greenStartX = innerLeft + 26 + blueLabelW + blueDescW + 40;
+
+  // Dot 2: Vibrant Green Dot
+  ctx.beginPath();
+  ctx.arc(greenStartX + 10, legendY, 7, 0, Math.PI * 2);
+  ctx.fillStyle = '#4EA72E';
+  ctx.fill();
+
+  ctx.font = `700 20px ${fontStack}`;
+  ctx.fillStyle = '#15803D';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('綠色姓名 ', greenStartX + 26, legendY);
+  const greenLabelW = ctx.measureText('綠色姓名 ').width;
+
+  ctx.font = `700 20px ${fontStack}`;
+  ctx.fillStyle = '#15803D';
+  ctx.fillText('= 當月 FYCC 非 0 已亮燈', greenStartX + 26 + greenLabelW, legendY);
+
+  ctx.restore();
+
   return canvas;
 }
 

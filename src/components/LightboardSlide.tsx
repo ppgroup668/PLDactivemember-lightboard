@@ -298,7 +298,7 @@ export const LightboardSlide: React.FC<LightboardSlideProps> = ({
 
         {/* Bottom Summary Section & PLD Logo */}
         <div
-          className={`mt-8 pt-4 flex flex-col items-end justify-end ${
+          className={`mt-8 pt-4 w-full flex flex-col items-end justify-end ${
             isDense && !compactMode && !isRosterEditMode ? 'lg:-mt-6' : ''
           }`}
         >
@@ -354,14 +354,30 @@ export const LightboardSlide: React.FC<LightboardSlideProps> = ({
             </div>
           </div>
 
-          {/* Bottom-Right Caption & PLD Geometric Wordmark */}
-          <div className="mt-3 flex items-end gap-3 self-end">
-            <div className="text-right text-[11px] sm:text-xs font-semibold text-[#2E3338] leading-snug">
-              <div>以公司Submissions Report計算Submission Active</div>
+          {/* Bottom Footer Row: Left Side Color Legend ("綠色姓名 = 當月 FYCC 非 0 已亮燈") + Right Side Caption & PLD Logo */}
+          <div className="w-full mt-4 flex flex-col sm:flex-row items-center sm:items-end justify-between gap-3 pt-2 border-t border-slate-200/60">
+            {/* Bottom-Left Color Legend */}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm font-semibold text-[#2E3338]">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#F8F8F8] border border-slate-300 shadow-2xs">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#182650]" />
+                <span className="text-[#182650] font-bold">深藍色姓名</span>
+                <span className="text-slate-600 font-normal">= 預設未亮燈 (FYCC 為 0)</span>
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-emerald-50 border border-emerald-400 shadow-2xs">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#53A630]" />
+                <span className="text-[#15803D] font-bold">綠色姓名</span>
+                <span className="text-[#15803D] font-bold">= 當月 FYCC 非 0 已亮燈</span>
+              </div>
             </div>
 
-            {/* PLD Geometric Logo SVG */}
-            <svg
+            {/* Bottom-Right Caption & PLD Geometric Wordmark */}
+            <div className="flex items-end gap-3 self-end sm:self-auto shrink-0">
+              <div className="text-right text-[11px] sm:text-xs font-semibold text-[#2E3338] leading-snug">
+                <div>以公司Submissions Report計算Submission Active</div>
+              </div>
+
+              {/* PLD Geometric Logo SVG */}
+              <svg
               width={compactMode ? 52 : 76}
               height={compactMode ? 32 : 46}
               viewBox="0 0 110 66"
@@ -419,5 +435,6 @@ export const LightboardSlide: React.FC<LightboardSlideProps> = ({
         </div>
       </div>
     </div>
+  </div>
   );
 };

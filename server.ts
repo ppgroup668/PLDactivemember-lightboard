@@ -167,6 +167,13 @@ function saveState(state: AppState) {
       state.syncHistory = state.syncHistory.slice(0, 3);
     }
     fs.writeFileSync(STATE_FILE, JSON.stringify(state), 'utf-8');
+    try {
+      fs.writeFileSync(
+        path.join(process.cwd(), 'src/shared/preloadedState.json'),
+        JSON.stringify(state, null, 2),
+        'utf-8'
+      );
+    } catch {}
   } catch (err) {
     console.error('Failed to save state:', err);
   }
@@ -831,11 +838,19 @@ function processReportGrid(
           turnedGreen: isPositiveFycc,
         });
       } else if (mode === 'replace' && memberResults.size > 0) {
-        member.isActive = false;
-        member.fycc = 0;
-        member.fyp = 0;
-        member.cases = 0;
-        member.lastUpdated = nowIso;
+        // Collect which teams are represented in the report results
+        const touchedTeamIds = new Set<string>();
+        for (const [, resItem] of memberResults.entries()) {
+          touchedTeamIds.add(resItem.team.id);
+        }
+        // Only reset if this is a comprehensive agency report (covering most teams) OR if this specific team is present in the report
+        if (touchedTeamIds.size >= 7 || touchedTeamIds.has(team.id)) {
+          member.isActive = false;
+          member.fycc = 0;
+          member.fyp = 0;
+          member.cases = 0;
+          member.lastUpdated = nowIso;
+        }
       }
     }
 

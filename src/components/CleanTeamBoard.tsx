@@ -329,15 +329,15 @@ export const CleanTeamBoard: React.FC<CleanTeamBoardProps> = ({
               <span className="text-slate-400 font-mono">└ 下線</span>
               <span>下方白色格代表該經理的下線</span>
             </span>
-            <span className="inline-flex items-center gap-1.5">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100/90 border border-slate-300">
               <span className="w-2.5 h-2.5 rounded-full bg-[#172554]" />
               <strong className="text-[#172554]">深藍色姓名</strong>
-              <span>= 預設未亮燈 (FYCC 為 0)</span>
+              <span className="text-slate-700">= 預設未亮燈 (FYCC 為 0)</span>
             </span>
-            <span className="inline-flex items-center gap-1.5">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 border border-emerald-400 shadow-2xs">
               <span className="w-2.5 h-2.5 rounded-full bg-[#16A34A]" />
               <strong className="text-[#15803D]">綠色姓名</strong>
-              <span>= 當月 FYCC 非 0 已亮燈</span>
+              <strong className="text-[#15803D]">= 當月 FYCC 非 0 已亮燈</strong>
             </span>
           </div>
 
