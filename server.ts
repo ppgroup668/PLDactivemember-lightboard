@@ -1784,18 +1784,59 @@ function loadSalesReportsFromLocalDiskIfAvailable(): SyncLogEntry | null {
     const hasHsui = fs.existsSync(LOCAL_HSUI_REPORT_FILE);
     if (!hasPld && !hasHsui) return null;
 
-    let combinedRows: unknown[][] = [];
+    let pldRows: unknown[][] = [];
+    let hsuiRows: unknown[][] = [];
     if (hasPld) {
       const pldBuf = fs.readFileSync(LOCAL_PLD_REPORT_FILE);
       if (pldBuf.length > 500) {
-        combinedRows.push(...parseBufferToRows(pldBuf));
+        pldRows = parseBufferToRows(pldBuf);
       }
     }
     if (hasHsui) {
       const hsuiBuf = fs.readFileSync(LOCAL_HSUI_REPORT_FILE);
       if (hsuiBuf.length > 500) {
-        const hsuiRows = parseBufferToRows(hsuiBuf);
-        combinedRows.push(...(combinedRows.length > 0 ? hsuiRows.slice(5) : hsuiRows));
+        hsuiRows = parseBufferToRows(hsuiBuf);
+      }
+    }
+
+    const pldDate = extractReportDateFromGrid(pldRows);
+    const hsuiDate = extractReportDateFromGrid(hsuiRows);
+    let preferredDisplayDate: string | null = null;
+
+    if (hsuiDate.displayDate && pldDate.displayDate) {
+      const dPld = new Date(pldDate.displayDate).getTime();
+      const dHsui = new Date(hsuiDate.displayDate).getTime();
+      if (!isNaN(dHsui) && !isNaN(dPld) && dHsui >= dPld) {
+        preferredDisplayDate = hsuiDate.displayDate;
+      } else {
+        preferredDisplayDate = pldDate.displayDate;
+      }
+    } else {
+      preferredDisplayDate = hsuiDate.displayDate || pldDate.displayDate;
+    }
+
+    let combinedRows: unknown[][] = [];
+    if (pldRows.length > 0) {
+      combinedRows.push(...pldRows);
+      if (hsuiRows.length > 0) {
+        combinedRows.push(...hsuiRows.slice(5));
+      }
+    } else if (hsuiRows.length > 0) {
+      combinedRows.push(...hsuiRows);
+    }
+
+    if (preferredDisplayDate && combinedRows.length > 1) {
+      for (let r = 0; r < Math.min(combinedRows.length, 5); r++) {
+        const row = combinedRows[r];
+        if (Array.isArray(row)) {
+          for (let c = 0; c < row.length; c++) {
+            const cell = String(row[c] ?? '');
+            if (/2026[-/]\d{2}[-/]\d{2}/.test(cell) || /\d{1,2}\s+[A-Za-z]{3}\s+20\d{2}/.test(cell)) {
+              row[c] = preferredDisplayDate;
+              break;
+            }
+          }
+        }
       }
     }
 
@@ -2300,23 +2341,24 @@ async function startServer() {
     res.json({ success: true, state: appState });
   });
 
-  // POST/GET auto-sync HEADCOUNT BY AVA.xls from Google Drive folder (instant response + background refresh)
+  // POST/GET auto-sync HEADCOUNT BY AVA.xls from Google Drive folder (awaits refresh and returns latest state)
   app.all('/api/sync-gdrive-headcount', async (_req, res) => {
     try {
+      let bgHc: HeadcountSyncLog | null = null;
+      let bgRep: SyncLogEntry | null = null;
+      try {
+        bgHc = await syncHeadcountFromGoogleDrive();
+        bgRep = await syncSalesReportsFromGoogleDrive();
+      } catch (e) {
+        console.warn('Direct Google Drive sync warning:', e);
+      }
+
       const headcountLog =
-        loadHeadcountFromLocalDiskIfAvailable() || appState.lastHeadcountSync;
+        bgHc || loadHeadcountFromLocalDiskIfAvailable() || appState.lastHeadcountSync;
       const syncLog =
-        loadSalesReportsFromLocalDiskIfAvailable() || appState.lastSync;
+        bgRep || loadSalesReportsFromLocalDiskIfAvailable() || appState.lastSync;
 
-      // Trigger background Google Drive refresh without blocking the HTTP response
-      (async () => {
-        try {
-          const bgHc = await syncHeadcountFromGoogleDrive();
-          const bgRep = await syncSalesReportsFromGoogleDrive();
-          if (bgHc || bgRep) broadcastState('state:updated');
-        } catch {}
-      })();
-
+      saveState(appState);
       broadcastState('state:updated');
       res.json({
         success: true,
@@ -2332,20 +2374,20 @@ async function startServer() {
     }
   });
 
-  // POST/GET auto-sync SalesProductionAgency_PLD_THIS MONTH & SalesProductionAgency_HSUI_THIS MONTH.xls from Google Drive folder (instant response + background refresh)
+  // POST/GET auto-sync SalesProductionAgency_PLD_THIS MONTH & SalesProductionAgency_HSUI_THIS MONTH.xls from Google Drive folder (awaits refresh and returns latest state)
   app.all('/api/sync-gdrive-reports', async (_req, res) => {
     try {
+      let bgRep: SyncLogEntry | null = null;
+      try {
+        bgRep = await syncSalesReportsFromGoogleDrive();
+      } catch (e) {
+        console.warn('Direct Google Drive reports sync warning:', e);
+      }
+
       const syncLog =
-        loadSalesReportsFromLocalDiskIfAvailable() || appState.lastSync;
+        bgRep || loadSalesReportsFromLocalDiskIfAvailable() || appState.lastSync;
 
-      // Trigger background Google Drive refresh without blocking the HTTP response
-      (async () => {
-        try {
-          const bgRep = await syncSalesReportsFromGoogleDrive();
-          if (bgRep) broadcastState('state:updated');
-        } catch {}
-      })();
-
+      saveState(appState);
       broadcastState('state:updated');
       res.json({
         success: true,

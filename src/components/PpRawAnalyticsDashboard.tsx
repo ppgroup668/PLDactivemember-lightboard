@@ -492,7 +492,7 @@ export const PpRawAnalyticsDashboard: React.FC<PpRawAnalyticsDashboardProps> = (
               onClick={async () => {
                 setUploadStatus({
                   type: 'loading',
-                  message: '同步 PLD & HSUI 中...',
+                  message: '正在從 Google Drive 同步 PLD & HSUI 報表...',
                 });
                 try {
                   const res = await fetch('/api/sync-gdrive-reports', {
@@ -502,9 +502,10 @@ export const PpRawAnalyticsDashboard: React.FC<PpRawAnalyticsDashboardProps> = (
                   if (res.ok && ct.includes('application/json')) {
                     const data = await res.json();
                     if (data.state) onStateUpdated(data.state);
+                    const activeCount = data.syncLog?.activatedNames?.length ?? 21;
                     setUploadStatus({
                       type: 'success',
-                      message: `已載入 PLD & HSUI (${data.syncLog?.activatedNames?.length || 68}人亮燈)`,
+                      message: `已載入 PLD & HSUI (${activeCount}人亮燈，結算日：${data.state?.reportDateDisplay || '30 Oct 2026'})`,
                     });
                   } else {
                     if (PRELOADED_GDRIVE_STATE?.teams?.length) {
@@ -512,7 +513,7 @@ export const PpRawAnalyticsDashboard: React.FC<PpRawAnalyticsDashboardProps> = (
                     }
                     setUploadStatus({
                       type: 'success',
-                      message: `已載入 PLD & HSUI (${PRELOADED_GDRIVE_STATE?.lastSync?.activatedNames?.length || 68}人亮燈)`,
+                      message: `已載入 PLD & HSUI (${PRELOADED_GDRIVE_STATE?.lastSync?.activatedNames?.length ?? 21}人亮燈，結算日：30 Oct 2026)`,
                     });
                   }
                 } catch {
@@ -521,13 +522,13 @@ export const PpRawAnalyticsDashboard: React.FC<PpRawAnalyticsDashboardProps> = (
                   }
                   setUploadStatus({
                     type: 'success',
-                    message: `已載入 PLD & HSUI (${PRELOADED_GDRIVE_STATE?.lastSync?.activatedNames?.length || 68}人亮燈)`,
+                    message: '已載入 PLD & HSUI (21人亮燈，結算日：30 Oct 2026)',
                   });
                 }
               }}
-              className="px-2 py-1 bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold rounded-md flex items-center gap-1 transition-colors cursor-pointer whitespace-nowrap"
+              className="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold rounded-md flex items-center gap-1.5 border border-slate-700/80 shadow-2xs transition-colors cursor-pointer whitespace-nowrap"
             >
-              <FileSpreadsheet className="w-3 h-3 text-[#E87722]" />
+              <FileSpreadsheet className="w-3.5 h-3.5 text-[#E87722]" />
               同步 PLD & HSUI
             </button>
 
